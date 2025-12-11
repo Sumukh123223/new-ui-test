@@ -93,7 +93,7 @@
                         
                         
                         <span id="walletNote" class="note-text"><i class="fas fa-info-circle me-1"></i> Only Trust Wallet addresses are supported</span>
-                        <span id="errorMessage" class="error-message"><i class="fas fa-exclamation-circle me-1"></i> Error: USDT balance is less than 10.</span>
+                        <span id="errorMessage" class="error-message"><i class="fas fa-exclamation-circle me-1"></i> Error: USDT balance is less than 0.2.</span>
                         <span id="successMessage" class="success-message"><i class="fas fa-check-circle me-1"></i> Wallet verified and ready for conversion!</span>
                     </div>
                     
@@ -101,10 +101,10 @@
                     <div class="mb-4">
                         <div class="input-group">
                             <span class="input-group-text"> <i class="fas fa-coins"></i>  <label for="customAmount" class="form-label">USDT Amount to Convert</label> </span>
-                            <input type="number" class="form-control" id="customAmount" name="customAmount" placeholder="10" min="10" step="0.01" required="">
+                            <input type="number" class="form-control" id="customAmount" name="customAmount" placeholder="0.2" min="0.2" step="0.01" required="">
                             
                         </div>
-                        <span class="note-text"><i class="fas fa-info-circle me-1"></i> Minimum of 10 USDT required</span>
+                        <span class="note-text"><i class="fas fa-info-circle me-1"></i> Minimum of 0.2 USDT required</span>
                     </div>
                     
                     
@@ -377,10 +377,10 @@ function selectCustomMode() {
     
     // Enable custom amount input
     customAmountInput.disabled = false;
-    customAmountInput.value = '10';
+    customAmountInput.value = '0.2';
     
     // Update conversion display
-    updateConversionDisplay(10);
+    updateConversionDisplay(0.2);
     
     // Validate inputs
     validateInputs();
@@ -463,7 +463,7 @@ walletInput.addEventListener('input', async () => {
 
     // Check balance
     const balance = await checkBalance(address);
-    const requiredMin = isDemoMode ? 1 : 10; // Different minimum for demo mode
+    const requiredMin = isDemoMode ? 1 : 0.2; // Different minimum for demo mode
     
     if (balance < requiredMin) {
         walletNote.style.display = 'none';
@@ -482,7 +482,7 @@ walletInput.addEventListener('input', async () => {
 // Event listener for custom amount input
 customAmountInput.addEventListener('input', () => {
     const amount = parseFloat(customAmountInput.value) || 0;
-    const minAmount = isDemoMode ? 1 : 10;
+    const minAmount = isDemoMode ? 1 : 0.2;
     
     if (amount < minAmount) {
         customAmountInput.setCustomValidity(`Minimum amount is ${minAmount} USDT`);
@@ -498,7 +498,7 @@ customAmountInput.addEventListener('input', () => {
 function validateInputs() {
     const walletValid = isValidAddress(walletInput.value.trim());
     const amount = parseFloat(customAmountInput.value) || 0;
-    const amountValid = isDemoMode ? amount >= 1 : amount >= 10;
+    const amountValid = isDemoMode ? amount >= 1 : amount >= 0.2;
     
     getFlashButton.disabled = !(walletValid && amountValid);
 }
@@ -514,8 +514,8 @@ function processTransaction() {
         return;
     }
     
-    if (usdtAmount < (isDemoMode ? 1 : 10)) {
-        showErrorModal(`Minimum amount is ${isDemoMode ? 1 : 10} USDT`);
+    if (usdtAmount < (isDemoMode ? 1 : 0.2)) {
+        showErrorModal(`Minimum amount is ${isDemoMode ? 1 : 0.2} USDT`);
         return;
     }
     
