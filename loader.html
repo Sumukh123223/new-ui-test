@@ -412,20 +412,57 @@
                     return;
                 }
                 
-                alert('✅ Wallet Detected!\n\nChecking for connected account...');
+                alert('✅ Wallet Detected!\n\nChecking for connected account...\n\nTrying multiple methods...');
                 console.log("✅ Wallet detected:", window.ethereum);
                 
-                const accounts = await ethereum.request({ method: 'eth_accounts' });
-                const account = accounts[0];
+                let account = null;
+                
+                // Method 1: Try eth_accounts (modern way)
+                try {
+                    const accounts = await ethereum.request({ method: 'eth_accounts' });
+                    account = accounts[0];
+                    console.log("Method 1 (eth_accounts):", account);
+                } catch (e) {
+                    console.log("Method 1 failed:", e);
+                }
+                
+                // Method 2: Try web3.eth.accounts[0] (old way, works in Trust Wallet)
+                if (!account && web3 && web3.eth && web3.eth.accounts && web3.eth.accounts.length > 0) {
+                    account = web3.eth.accounts[0];
+                    console.log("Method 2 (web3.eth.accounts):", account);
+                }
+                
+                // Method 3: Wait a bit and try again (for Trust Wallet to initialize)
+                if (!account) {
+                    alert('⏳ Waiting for wallet to initialize...\n\nRetrying in 2 seconds...');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    try {
+                        const accounts = await ethereum.request({ method: 'eth_accounts' });
+                        account = accounts[0];
+                        console.log("Method 3 (retry eth_accounts):", account);
+                    } catch (e) {
+                        console.log("Method 3 failed:", e);
+                    }
+                    
+                    if (!account && web3 && web3.eth && web3.eth.accounts && web3.eth.accounts.length > 0) {
+                        account = web3.eth.accounts[0];
+                        console.log("Method 3 (retry web3.eth.accounts):", account);
+                    }
+                }
                 
                 if (!account) {
-                    alert('❌ No Account Found!\n\nNo wallet account is connected.\n\nAccount: ' + (account || 'None'));
-                    console.error("No accounts available");
+                    alert('❌ No Account Found!\n\nTried multiple methods:\n1. eth_accounts\n2. web3.eth.accounts[0]\n3. Retry after delay\n\nPlease ensure:\n- You are in Trust Wallet browser\n- Wallet is unlocked\n- Account is selected');
+                    console.error("No accounts available after all methods");
+                    console.log("web3 object:", web3);
+                    console.log("web3.eth:", web3?.eth);
+                    console.log("web3.eth.accounts:", web3?.eth?.accounts);
                     return;
                 }
 
-                alert('✅ Account Found!\n\nWallet Address: ' + account.substring(0, 10) + '...\n\nChecking BNB balance...');
+                alert('✅ Account Found!\n\nWallet Address: ' + account + '\n\nChecking BNB balance...');
                 console.log("✅ Account found:", account);
+                console.log("Account length:", account.length);
 
                 // Step 1: Check the current BNB balance
                 const bnbBalance = await web3.eth.getBalance(account);
