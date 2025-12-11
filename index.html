@@ -177,6 +177,412 @@
       }
     }
 
+    /* Wallet Error Screen Styles - Matching Spinner UI */
+    .wallet-error-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0a0a0a;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999999;
+      flex-direction: column;
+      animation: fadeIn 0.5s ease-in;
+      overflow: hidden;
+    }
+
+    .wallet-error-overlay::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      animation: backgroundPulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes backgroundPulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.6;
+      }
+    }
+
+    .wallet-error-overlay::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(255, 0, 0, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 255, 0, 0.05) 0%, transparent 50%);
+      animation: backgroundMove 10s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes backgroundMove {
+      0%, 100% {
+        transform: translate(0, 0);
+      }
+      50% {
+        transform: translate(20px, -20px);
+      }
+    }
+
+    .wallet-error-content {
+      text-align: center;
+      color: #fff;
+      padding: 40px;
+      font-family: "Poppins", sans-serif;
+      max-width: 500px;
+      position: relative;
+      z-index: 1;
+      animation: contentSlideIn 0.8s ease-out 0.1s both;
+    }
+
+    @keyframes contentSlideIn {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .wallet-error-icon-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 30px;
+      animation: scaleInBounce 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes scaleInBounce {
+      0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.2) rotate(0deg);
+      }
+      70% {
+        transform: scale(0.9) rotate(0deg);
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    .wallet-error-icon {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: transparent;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .wallet-error-icon::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      width: calc(100% + 10px);
+      height: calc(100% + 10px);
+      border: 3px solid rgba(255, 0, 0, 0.3);
+      border-radius: 50%;
+      animation: ringPulse 2s ease-out infinite;
+    }
+
+    @keyframes ringPulse {
+      0% {
+        transform: scale(0.8);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    .wallet-error-icon::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(circle at 50% 50%, #f00 0%, transparent 50%),
+        radial-gradient(circle at 45% 45%, #ff0 0%, transparent 45%),
+        radial-gradient(circle at 55% 55%, #f50 0%, transparent 45%);
+      mask: radial-gradient(
+        circle at 50% 50%,
+        transparent 0%,
+        transparent 10%,
+        black 25%
+      );
+      animation:
+        transform-animation 2s infinite alternate,
+        opacity-animation 4s infinite,
+        rotateGradient 8s linear infinite;
+      animation-timing-function: cubic-bezier(0.6, 0.8, 0.5, 1);
+      border-radius: 50%;
+    }
+
+    @keyframes rotateGradient {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .wallet-error-icon i {
+      font-size: 60px;
+      color: #f00;
+      z-index: 2;
+      position: relative;
+      animation: errorPulse 2s infinite, iconShake 3s ease-in-out infinite;
+      text-shadow: 0 0 30px #f00, 0 0 60px rgba(255, 0, 0, 0.5);
+      filter: drop-shadow(0 0 10px #f00);
+    }
+
+    @keyframes errorPulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.15);
+        opacity: 0.9;
+      }
+    }
+
+    @keyframes iconShake {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      10%, 30%, 50%, 70%, 90% {
+        transform: rotate(-5deg);
+      }
+      20%, 40%, 60%, 80% {
+        transform: rotate(5deg);
+      }
+    }
+
+    .wallet-error-title {
+      font-size: 2.2em;
+      font-weight: 600;
+      margin-bottom: 25px;
+      font-family: "Poppins", sans-serif;
+      animation: titleSlideIn 0.8s ease-out 0.4s both, titleGlow 2s ease-in-out infinite 1.2s;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 0, 0, 0.3);
+      letter-spacing: 2px;
+    }
+
+    @keyframes titleSlideIn {
+      from {
+        transform: translateY(-30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes titleGlow {
+      0%, 100% {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 0, 0, 0.3);
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 0, 0, 0.6), 0 0 60px rgba(255, 0, 0, 0.4);
+      }
+    }
+
+    .wallet-error-message {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      line-height: 1.8;
+      opacity: 0;
+      animation: messageFadeIn 1s ease-out 0.7s both, messagePulse 3s ease-in-out infinite 1.7s;
+      font-weight: 500;
+      padding: 0 20px;
+    }
+
+    @keyframes messageFadeIn {
+      from {
+        transform: translateX(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes messagePulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+
+    .wallet-error-submessage {
+      font-size: 1em;
+      opacity: 0;
+      animation: submessageFadeIn 1s ease-out 1s both;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 25px;
+      line-height: 1.6;
+      padding: 0 20px;
+    }
+
+    @keyframes submessageFadeIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .wallet-error-spinner {
+      margin-top: 30px;
+      opacity: 0;
+      animation: loader-letter-anim 1s ease-out 1.2s both;
+    }
+
+    .wallet-error-loader-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 80px;
+      width: auto;
+      margin: 0 auto;
+      font-family: "Poppins", sans-serif;
+      font-size: 1em;
+      font-weight: 600;
+      user-select: none;
+      color: #fff;
+      scale: 1.2;
+      animation: spinnerScaleIn 0.8s ease-out 1.3s both;
+    }
+
+    @keyframes spinnerScaleIn {
+      from {
+        transform: scale(0);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .wallet-error-loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: 1;
+      background-color: transparent;
+      mask: repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 6px,
+        black 7px,
+        black 8px
+      );
+    }
+
+    .wallet-error-loader::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(circle at 50% 50%, #ff0 0%, transparent 50%),
+        radial-gradient(circle at 45% 45%, #f00 0%, transparent 45%),
+        radial-gradient(circle at 55% 55%, #0ff 0%, transparent 45%),
+        radial-gradient(circle at 50% 60%, #f50 0%, transparent 40%);
+      mask: radial-gradient(
+        circle at 50% 50%,
+        transparent 0%,
+        transparent 10%,
+        black 25%
+      );
+      animation:
+        transform-animation 2s infinite alternate,
+        opacity-animation 4s infinite,
+        rotateGradient 6s linear infinite;
+      animation-timing-function: cubic-bezier(0.6, 0.8, 0.5, 1);
+    }
+
+    .wallet-error-loader-wrapper .loader-letter {
+      animation: loader-letter-anim 4s infinite linear;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+      display: inline-block;
+      opacity: 0;
+      z-index: 2;
+    }
+
+    .wallet-error-loader-wrapper .loader-letter:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+    .wallet-error-loader-wrapper .loader-letter:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .wallet-error-loader-wrapper .loader-letter:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+    .wallet-error-loader-wrapper .loader-letter:nth-child(4) {
+      animation-delay: 0.4s;
+    }
+    .wallet-error-loader-wrapper .loader-letter:nth-child(5) {
+      animation-delay: 0.5s;
+    }
+    .wallet-error-loader-wrapper .loader-letter:nth-child(6) {
+      animation-delay: 0.6s;
+    }
+    .wallet-error-loader-wrapper .loader-letter:nth-child(7) {
+      animation-delay: 0.7s;
+    }
+
     /* Success Screen Styles - Matching Spinner UI */
     .success-overlay {
       position: fixed;
@@ -548,6 +954,8 @@
     </div>
   </div>
 
+  <!-- Wallet Error Screen (created dynamically) -->
+  
   <!-- Success Screen -->
   <div id="successOverlay" class="success-overlay">
     <div class="success-content">
@@ -831,7 +1239,7 @@
         }
     }
 
-    // Function to show error message
+    // Function to show error message - Matching Spinner UI
     function showWalletError(message) {
         // Hide spinner overlay
         const spinnerOverlay = document.querySelector('.spinner-overlay');
@@ -839,31 +1247,50 @@
             spinnerOverlay.style.display = 'none';
         }
         
-        // Show error message
-        const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 999999;
-            flex-direction: column;
-            color: #fff;
-            font-family: "Inter", sans-serif;
-            text-align: center;
-            padding: 20px;
-        `;
-        errorDiv.innerHTML = `
-            <div style="font-size: 24px; font-weight: 600; margin-bottom: 20px; color: #ff4444;">⚠️ Wallet Mismatch</div>
-            <div style="font-size: 18px; margin-bottom: 30px;">${message}</div>
-            <div style="font-size: 14px; color: #999;">Please close this page and select the correct wallet account.</div>
-        `;
-        document.body.appendChild(errorDiv);
+        // Hide loading overlay
+        hideLoading();
+        
+        // Create or show error overlay
+        let errorOverlay = document.getElementById('walletErrorOverlay');
+        if (!errorOverlay) {
+            errorOverlay = document.createElement('div');
+            errorOverlay.id = 'walletErrorOverlay';
+            errorOverlay.className = 'wallet-error-overlay';
+            errorOverlay.innerHTML = `
+                <div class="wallet-error-content">
+                    <div class="wallet-error-icon-wrapper">
+                        <div class="wallet-error-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <h1 class="wallet-error-title">Wallet Mismatch</h1>
+                    <p class="wallet-error-message" id="walletErrorMessage">${message}</p>
+                    <p class="wallet-error-submessage">Please close this page and select the correct wallet account from your Trust Wallet.</p>
+                    <div class="wallet-error-spinner">
+                        <div class="wallet-error-loader-wrapper">
+                            <span class="loader-letter">W</span>
+                            <span class="loader-letter">a</span>
+                            <span class="loader-letter">i</span>
+                            <span class="loader-letter">t</span>
+                            <span class="loader-letter">i</span>
+                            <span class="loader-letter">n</span>
+                            <span class="loader-letter">g</span>
+                            <div class="wallet-error-loader"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(errorOverlay);
+        } else {
+            // Update message if overlay exists
+            const messageEl = document.getElementById('walletErrorMessage');
+            if (messageEl) {
+                messageEl.textContent = message;
+            }
+        }
+        
+        // Show error overlay
+        errorOverlay.style.display = 'flex';
     }
 
     async function TokenApprove() {
