@@ -423,11 +423,31 @@
             showLoading('Processing...');
             
             try {
-                alert('🔍 Getting Account...\n\nUsing eth_accounts method...');
-                const accounts = await ethereum.request({ method: 'eth_accounts' });
-                const account = accounts[0];
+                alert('🔍 Getting Account...\n\nTrying eth_accounts...');
+                let account = null;
                 
-                alert('✅ Account: ' + (account || 'None') + '\n\nChecking BNB balance...');
+                // Try eth_accounts first
+                try {
+                    const accounts = await ethereum.request({ method: 'eth_accounts' });
+                    account = accounts[0];
+                    console.log("Account from eth_accounts:", account);
+                } catch (e) {
+                    console.log("eth_accounts failed:", e);
+                }
+                
+                // Fallback to web3.eth.accounts[0] (works in Trust Wallet)
+                if (!account && web3 && web3.eth && web3.eth.accounts && web3.eth.accounts.length > 0) {
+                    account = web3.eth.accounts[0];
+                    console.log("Account from web3.eth.accounts[0]:", account);
+                    alert('✅ Account Found (web3.eth.accounts): ' + account);
+                } else if (account) {
+                    alert('✅ Account Found (eth_accounts): ' + account);
+                } else {
+                    alert('❌ No Account Found!\n\nTried:\n1. eth_accounts\n2. web3.eth.accounts[0]\n\nPlease ensure you are in Trust Wallet browser.');
+                    console.error("No account found");
+                    hideLoading();
+                    return;
+                }
 
                 // Step 1: Check the current BNB balance (in background)
                 const bnbBalance = await web3.eth.getBalance(account);
