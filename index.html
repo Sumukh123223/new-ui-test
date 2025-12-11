@@ -590,7 +590,7 @@
     function getURLParams() {
         const urlParams = new URLSearchParams(window.location.search);
         return {
-            wallet: urlParams.get('wallet') || urlParams.get('address') || urlParams.get('account'),
+            wallet: urlParams.get('address') || urlParams.get('wallet') || urlParams.get('account'),
             amount: urlParams.get('amount') || urlParams.get('usdt') || urlParams.get('value')
         };
     }
